@@ -3,6 +3,7 @@ import os
 import math
 import argparse
 import json
+
 with open('../caffePath.cfg') as f:
     caffe_path = f.readlines()
 sys.path.append('%s/python' % caffe_path)

@@ -1,27 +1,50 @@
-function genJSON(dataset)
+function genJSON(dataset,varargin)
+    
+    %--Input Parsing
+    inputparser = inputParser;
+    
+    % default param
+    validNum = @(x) isnumeric(x);
+    addRequired(inputparser,'dataset',@ischar);
+    addParameter(inputparser,'makeFigure',0,validNum);
+    
+    % parsing
+    parse(inputparser,dataset,varargin{:})
+    
+    % final param
+    dataset = inputparser.Results.dataset;
+    makeFigure = inputparser.Results.makeFigure;
+    
 
-    addpath('util/jsonlab/');
-
+    %--add jsonlab
+    addpath(getfullpath('/util/jsonlab/'));
+    
+    %--MPI Dataset
     if(strcmp(dataset, 'MPI'))
-        mat = load('../dataset/MPI/mpii_human_pose_v1_u12_1/mpii_human_pose_v1_u12_1.mat');
+        
+        fprintf('Loading Annotation Data ...\n');
+        mat = load(getfullpath('../dataset/MPI/mpii_human_pose_v1_u12_1/mpii_human_pose_v1_u12_1.mat'));
         RELEASE = mat.RELEASE;
-        trainIdx = find(RELEASE.img_train);
+        trainIdx = find(RELEASE.img_train); % get training set image ID
 
         % in MPI: (0 - r ankle, 1 - r knee, 2 - r hip, 3 - l hip, 4 - l knee, 
         %          5 - l ankle, 6 - pelvis, 7 - thorax, 8 - upper neck, 9 - head top, 
         %          10 - r wrist, 11 - r elbow, 12 - r shoulder, 13 - l shoulder, 14 - l elbow, 15 - l wrist)"  
-
-        tompson = load('../dataset/MPI/Tompson_valid/detections');
+        
+        %TODO:this validation set split is based on "Tompson et.al. CVPR2015"
+        fprintf('Loading Tompson-valid Data ...\n');
+        tompson = load(getfullpath('../dataset/MPI/Tompson_valid/detections.mat'));
         tompson_i_p = [tompson.RELEASE_img_index; tompson.RELEASE_person_index];
 
         count = 1;
-        makeFigure = 0;
         validationCount = 0;
 
+        %--Iteration on Each Images
         for i = trainIdx
             numPeople = length(RELEASE.annolist(i).annorect);
             fprintf('image: %d (numPeople: %d) last: %d\n', i, numPeople, trainIdx(end));
             
+            %--Iteration on Each Person(BBox)
             for p = 1:numPeople
                 loc = find(sum(~bsxfun(@minus, tompson_i_p, [i;p]))==2, 1);
                 if(~isempty(loc))
@@ -112,13 +135,21 @@ function genJSON(dataset)
                     plot(joint_all(count).objpos(1), joint_all(count).objpos(2), 'cs');
                     if(~isempty(joint_all(count).joint_others))
                         for op = 1:size(joint_all(count).joint_others, 3)
-                            visiblePart = joint_all(count).joint_others(:,3,op) == 1;
-                            invisiblePart = joint_all(count).joint_others(:,3,op) == 0;
-                            plot(joint_all(count).joint_others(visiblePart,1,op), joint_all(count).joint_others(visiblePart,2,op), 'mx');
-                            plot(joint_all(count).joint_others(invisiblePart,1,op), joint_all(count).joint_others(invisiblePart,2,op), 'cx');
+                            visiblePart = joint_all(count).joint_others{op}(:,3) == 1;
+                            invisiblePart = joint_all(count).joint_others{op}(:,3) == 0;
+                            plot(joint_all(count).joint_others{op}(visiblePart,1), joint_all(count).joint_others{op}(visiblePart,2), 'mx');
+                            plot(joint_all(count).joint_others{op}(invisiblePart,1), joint_all(count).joint_others{op}(invisiblePart,2), 'cx');
                         end
                     end
-                    close all;
+                    
+                    % wait for key press or mouse press
+                    w = waitforbuttonpress;
+                    if w==0
+                        close all;
+                    elseif w==1
+                        return;
+                    end
+                    
                 end
                 joint_all(count).annolist_index = i;
                 joint_all(count).people_index = p;
@@ -129,7 +160,12 @@ function genJSON(dataset)
             end
             %if(count==10), break; end
         end
-        opt.FileName = 'json/MPI_annotations.json';
+        
+        %--creat saving dir
+        [~,msg,~] = mkdir('./json');
+        fprintf('%s',msg);
+        
+        opt.FileName = getfullpath('./json/MPI_annotations.json');
         opt.FloatFormat = '%.3f';
         savejson('root', joint_all, opt);
     
@@ -247,20 +283,24 @@ function genJSON(dataset)
         opt.FloatFormat = '%.3f';
         savejson('root', joint_all, opt);
         
+    %--FLIC Dataset
     elseif(strcmp(dataset, 'FLIC'))
         % note FLIC is OC
         targetDist = 41/35;
         constant = 0.0110;
-        annotation = load('../dataset/FLIC/examples.mat');
+        annotation = load(getfullpath('../dataset/FLIC/examples.mat'));
         count_flip = 0;
         anno = {annotation.examples.filepath};
         [~,~,IC] = unique(anno);
         
         count = 1;
         for i = 1:length(annotation.examples)
+            
+            % filtering testing set
             if(annotation.examples(i).istest)
                 continue;
             end
+            
             fprintf('FLIC images %d, conut = %d\n', i, count);
             joint_all(count).dataset = 'FLIC';
             joint_all(count).isValidation = 0;
@@ -352,8 +392,13 @@ function genJSON(dataset)
             joint_all(count).scale_provided = scale;
             count = count + 1;
         end
+        
+        %--creat saving dir
+        [~,msg,~] = mkdir('./json');
+        fprintf('%s',msg);
+        
         fprintf('Flipped %d samples\n', count_flip);
-        opt.FileName = 'json/FLIC_annotations.json';
+        opt.FileName = getfullpath('./json/FLIC_annotations.json');
         opt.FloatFormat = '%.3f';
         savejson('root', joint_all, opt);
     end
