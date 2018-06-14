@@ -17,8 +17,10 @@ modelID = 1
 [[1]]
 caffemodel_person = '../../model/_trained_person_MPI/pose_iter_70000.caffemodel'
 deployFile_person = '../../model/_trained_person_MPI/pose_deploy_copy_4sg_resize.prototxt'
-caffemodel = '../../model/_trained_MPI/pose_iter_320000.caffemodel'
-deployFile = '../../model/_trained_MPI/pose_deploy_resize.prototxt'
+#caffemodel = '../../model/_trained_MPI/pose_iter_320000.caffemodel'
+caffemodel = '../../model/_trained_FLIC/pose_iter_5000.caffemodel'
+#deployFile = '../../model/_trained_MPI/pose_deploy_resize.prototxt'
+deployFile = '../../model/_trained_FLIC/pose_deploy_new.prototxt'
 description = 'MPII 6 stage'
 boxsize = 368
 np = 14

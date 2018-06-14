@@ -4,10 +4,10 @@ import math
 import argparse
 import json
 
-with open('../caffePath.cfg') as f:
-    caffe_path = f.readlines()
-sys.path.append('%s/python' % caffe_path)
-print 'specified caffe path: %s' % caffe_path
+#with open('../caffePath.cfg') as f:
+#    caffe_path = f.readlines()
+#sys.path.append('%s/python' % caffe_path)
+#print 'specified caffe path: %s' % caffe_path
 import caffe
 from caffe import layers as L  # pseudo module using __getattr__ magic to generate protobuf messages
 from caffe import params as P  # pseudo module using __getattr__ magic to generate protobuf messages
