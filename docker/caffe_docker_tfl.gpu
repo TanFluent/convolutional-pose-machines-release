@@ -16,7 +16,6 @@ RUN apt-get update && apt-get install -y \
 		liblcms2-dev \
 		libopenblas-dev \
 		liblapack-dev \
-		libopenjpeg2 \
 		libpng12-dev \
 		libssl-dev \
 		libtiff5-dev \
@@ -73,12 +72,6 @@ RUN apt-get update && apt-get install -y \
 RUN curl -O https://bootstrap.pypa.io/get-pip.py && \
 	python get-pip.py && \
 	rm get-pip.py
-
-# Add SNI support to Python
-RUN pip --no-cache-dir install \
-		pyopenssl \
-		ndg-httpsclient \
-		pyasn1
 
 # Install useful Python packages using apt-get to avoid version incompatibilities with Tensorflow binary
 # especially numpy, scipy, skimage and sklearn (see https://github.com/tensorflow/tensorflow/issues/2034)
