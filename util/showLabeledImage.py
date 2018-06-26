@@ -17,7 +17,10 @@ class DeepFashionLandmark:
         self.cloth_type = ['None', 'upper-body', 'lower-body', 'full-body']
         self.pose_type = ['None', 'normal pose', 'medium pose', 'large pose', 'medium zoom-in', 'large zoom-in']
         self.visibility_type = ['visible', 'invisible', 'truncated']
-
+        self.upper_body_lm = ["left collar", "right collar", "left sleeve", "right sleeve", "left hem", "right hem"]
+        self.lower_body_lm = ["left waistline", "right waistline", "left hem", "right hem"]
+        self.full_body_lm = ["left collar", "right collar", "left sleeve", "right sleeve", "left waistline",
+                             "right waistline", "left hem", "right hem"]
 
     def show_DeepFashionLM(self):
 
@@ -102,9 +105,10 @@ class DeepFashionLandmark:
     def _plot_anno_info(self, im, lm_info, bb_info, joints_info):
         h,w,c = im.shape
 
-        bb_color = (50,255,255)
-        lm_color = (255,0,0)
-        joints_color = (0,255,0)
+        bb_color = (50, 255, 255)
+        lm_color_visible = (255, 0, 0)
+        lm_color_invisible = (255, 255, 0)
+        joints_color = (0, 255, 0)
 
         # plot bb
         bb = bb_info['bbox']
@@ -113,11 +117,31 @@ class DeepFashionLandmark:
         # plot lm
         lm = lm_info['landmark']
 
-        for idx in range(0,len(lm),3):
-            if idx+1>len(lm):
+        # cloth type
+        if len(lm/3) == 6:
+            cloth_type_idx = 1
+        elif len(lm/3) == 4:
+            cloth_type_idx = 2
+        elif len(lm/3) == 8:
+            cloth_type_idx = 3
+        else:
+            print("Invalid Landmark number! Please check your data.")
+            exit()
+
+        for idx in range(0, len(lm), 3):
+            if idx+1 > len(lm):
                 break
+
+            lm_visible = lm[idx + 0]  # 0 : visible; 1 : invisible
             lm_x = lm[idx + 1]
             lm_y = lm[idx + 2]
+
+            lm_color = lm_color_visible
+            if self.visibility_type[lm_visible] == "invisible":
+                lm_color = lm_color_invisible
+            elif self.visibility_type[lm_visible] == "truncated":
+                print("landmark #%d is not in image" % (idx/3))
+
             cv2.circle(im, (lm_x, lm_y), 10, color=lm_color)
 
         # plot joints

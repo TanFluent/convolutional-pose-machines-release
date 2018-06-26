@@ -78,12 +78,15 @@ function genJSON(dataset,varargin)
                     joint_all(count).joint_self(anno(part).id+1, 1) = anno(part).x;
                     joint_all(count).joint_self(anno(part).id+1, 2) = anno(part).y;
                     try % sometimes no is_visible...
+                        
+                        % invisible
                         if(anno(part).is_visible == 0 || anno(part).is_visible == '0')
                             joint_all(count).joint_self(anno(part).id+1, 3) = 0;
+                        % visible
                         else
                             joint_all(count).joint_self(anno(part).id+1, 3) = 1;
                         end
-                    catch
+                    catch % "[]" means visible ?? default is visible!!! Hell
                         joint_all(count).joint_self(anno(part).id+1, 3) = 1;
                     end
                 end
@@ -287,7 +290,7 @@ function genJSON(dataset,varargin)
     elseif(strcmp(dataset, 'FLIC'))
         % note FLIC is OC
         targetDist = 41/35;
-        constant = 0.0110;
+        constant = 0.0110;  % 1/90 = 0.011, std_bb_height = 90 pixel
         annotation = load(getfullpath('../dataset/FLIC/examples.mat'));
         count_flip = 0;
         anno = {annotation.examples.filepath};
@@ -317,12 +320,31 @@ function genJSON(dataset,varargin)
             joint_all(count).people_index = 1;
             
             coords = annotation.examples(i).coords;
-            coords(isnan(coords)) = [];
+            
+            % remove "NAN" coords
+            % key.lsho = 1; #1
+            % key.lelb = 2; #2
+            % key.lwri = 3; #3
+            % key.rsho = 4; #4
+            % key.relb = 5; #5
+            % key.rwri = 6; #6
+            % key.lhip = 7; #7
+            % key.rhip = 10; #8
+            % key.leye = 13; #9
+            % key.reye = 14; #10
+            % key.nose = 17; #11
+            coords(isnan(coords)) = [];  
             coords = reshape(coords, [2 11]);
+            
+            % remove  "leye","reye"
             coords(:,[9 10]) = [];
             coords = coords';
-            coords = [coords, ones(9,1)];
             
+            % set all key point is visible
+            coords = [coords, ones(9,1)];   
+            
+            % ignore person flip when training!
+            % predict "left" if it is appear on the left side of the image
             if(coords(4,1) > coords(1,1))
                 coords([1 2 3 4 5 6 7 8],:) = coords([4 5 6 1 2 3 8 7],:);
                 count_flip = count_flip + 1;
@@ -362,11 +384,14 @@ function genJSON(dataset,varargin)
 %             plot([box(1) box(1) box(3) box(3) box(1)], [box(2) box(4) box(4) box(2) box(2)]);
             torso_height = box(4) - box(2);
             
+            % predict objpos from bb
             joint_all(count).objpos = [(box(1)+box(3))/2, (box(2)*0.7 + box(4)*0.3)];
             
             % in cpp: real scale = param_.target_dist()/meta.scale_self = (41/35)/scale_input
             
+            % scale = real_bb_heigit / std_bb_height;
             scale = constant * torso_height;
+            
 %             real_scale = targetDist/scale;
 %             img = imresize(img, real_scale);
 %             

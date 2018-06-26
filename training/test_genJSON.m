@@ -1,5 +1,5 @@
 clear;
 clc;
 % test genJSON.m
-dataset = 'FLIC';
+dataset = 'MPI';
 genJSON(dataset,'makeFigure',1);

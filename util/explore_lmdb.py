@@ -6,6 +6,7 @@ from caffe.proto import caffe_pb2
 import pdb
 
 lmdb_data_dir = '/home/tfl/workspace/project/convolutional-pose-machines-release/training/lmdb/FLIC/'
+#lmdb_data_dir = '/home/tfl/workspace/project/convolutional-pose-machines-release/dataset/DeepfashionLandmark/lmdb/test100'
 
 lmdb_env = lmdb.open(lmdb_data_dir)
 lmdb_txn = lmdb_env.begin()
@@ -29,8 +30,19 @@ for key, value in lmdb_cursor:
     else:
         image_data = data
 
+    #pdb.set_trace()
+
     #CxHxW to HxWxC in cv2
     image = np.transpose(image_data, (1,2,0))
     cv2.imshow('cv2', image)
-    cv2.waitKey(1)
+
     print('{},{}'.format(key, label))
+
+    k = cv2.waitKey(0)
+    if k == ord('q'):
+        cv2.destroyAllWindows()
+        break
+    else:
+        cv2.destroyAllWindows()
+        continue
+
