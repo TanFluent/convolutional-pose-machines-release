@@ -2,10 +2,10 @@ import os
 import time
 
 # should restart training from snap
-restart_training = True
+restart_training = False
 
 # GPU
-used_gpu = '0,1,2,3'
+used_gpu = '0,1'
 
 # caffe exec
 caffe_exec_path = '/tanfulun/workspaces/Project/caffe-cpm/caffe/build/tools/caffe'
@@ -14,11 +14,12 @@ caffe_exec_path = '/tanfulun/workspaces/Project/caffe-cpm/caffe/build/tools/caff
 project_dir = '/tanfulun/workspaces/Project/clothing_key_point_detection/convolutional-pose-machines-release/'
 
 # solver
-solver_path = os.path.join(project_dir, 'training/prototxt/FLIC/pose_solver.prototxt')
+solver_path = os.path.join(project_dir, 'training/prototxt/DeepFashion_Landmark/pose_solver.prototxt')
 
 #------------------
-stime = time.ctime()
-print(stime)
+stime_str = time.ctime()
+stime = time.time()
+print(stime_str)
 
 if not restart_training:
     os.system('nohup %s train --solver=%s -gpu %s >caffe_log.log 2>&1'%(caffe_exec_path,solver_path,used_gpu))
@@ -28,8 +29,9 @@ else:
     os.system('nohup %s train --solver=%s --snapshot=%s -gpu %s >caffe_log_%s.log 2>&1'%(caffe_exec_path,solver_path,snapshot,used_gpu,iteration))
 
 #end-training-time
-etime = time.ctime()
-print(etime)
+etime_str = time.ctime()
+etime = time.time()
+print(etime_str)
 
 # Training Time
 dur_sec = etime-stime

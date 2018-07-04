@@ -104,7 +104,9 @@ RUN pip --no-cache-dir install --upgrade ipython && \
 		sphinx \
 		wheel \
 		zmq \
-        lmdb \
+                configobj
+                lmdb \
+                numpy
 		&& \
 	python -m ipykernel.kernelspec
 

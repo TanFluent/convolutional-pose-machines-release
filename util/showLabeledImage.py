@@ -118,11 +118,11 @@ class DeepFashionLandmark:
         lm = lm_info['landmark']
 
         # cloth type
-        if len(lm/3) == 6:
+        if len(lm)/3 == 6:
             cloth_type_idx = 1
-        elif len(lm/3) == 4:
+        elif len(lm)/3 == 4:
             cloth_type_idx = 2
-        elif len(lm/3) == 8:
+        elif len(lm)/3 == 8:
             cloth_type_idx = 3
         else:
             print("Invalid Landmark number! Please check your data.")
