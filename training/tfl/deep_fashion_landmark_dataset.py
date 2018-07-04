@@ -16,6 +16,7 @@ class DeepFashionLandmark:
         self._pose_type = ['None', 'normal pose', 'medium pose', 'large pose', 'medium zoom-in', 'large zoom-in']
         self._visibility_type = ['visible', 'invisible', 'truncated']
         self._dataset_name = 'DeepFashion_Landmark'
+        self._num_of_max_landmark = 18
 
         # --Dataset Dir
         self._dataset_dir = dataset_dir
@@ -134,8 +135,16 @@ class DeepFashionLandmark:
             # --Get image Landmark(only one landmark set per image)
             im_lm = lm_dict[im_name_list[idx]]['landmark']
 
+            # --Get cloth type
+            im_type = lm_dict[im_name_list[idx]]['cloth_type']
+
             # --Landmark data format change
-            im_lm_float_list = []
+            # [0:5]-upper [6:9]-lower [10:17]-full
+            if len(im_lm)/3 > self._num_of_max_landmark:
+                print("Num of Landmark is invalid!")
+                exit()
+
+            tmp_im_lm_float_list = []
             for idx in range(0, len(im_lm), 3):
                 if idx + 1 > len(im_lm):
                     break
@@ -151,7 +160,33 @@ class DeepFashionLandmark:
                 lm_y = im_lm[idx + 2]
 
                 tmp = [float(lm_x), float(lm_y), float(lm_visible)]
-                im_lm_float_list.append(tmp)
+                tmp_im_lm_float_list.append(tmp)
+
+            # upper
+            if im_type == 1:
+                append_head = 0
+                append_tail = 12
+            # lower
+            elif im_type == 2:
+                append_head = 6
+                append_tail = 8
+            # full
+            else:
+                append_head = 10
+                append_tail = 0
+
+            # append list
+            tmp_list = []
+            append_data = [-10.0, -10.0, 2.0] # TODO: Ensure this lm outside the image.
+            for index in range(append_head):
+                tmp_list.append(append_data)
+
+            tmp_im_lm_float_list = tmp_list + tmp_im_lm_float_list
+
+            for index in range(append_tail):
+                tmp_im_lm_float_list.append(append_data)
+
+            im_lm_float_list = tmp_im_lm_float_list
 
             # --Predict objpos from landmark data
             im_lm_arr = np.array(im_lm)
