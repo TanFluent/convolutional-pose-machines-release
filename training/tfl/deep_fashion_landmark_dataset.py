@@ -17,6 +17,7 @@ class DeepFashionLandmark:
         self._visibility_type = ['visible', 'invisible', 'truncated']
         self._dataset_name = 'DeepFashion_Landmark'
         self._num_of_max_landmark = 18
+        self._image_min_width = 18 * 4
 
         # --Dataset Dir
         self._dataset_dir = dataset_dir
@@ -200,11 +201,11 @@ class DeepFashionLandmark:
             objpos = [(topleft_x + bottomdown_x)/2, (topleft_y + bottomdown_y)/2]
 
             # --Padding the image if its width too small
-            if (width < 64):
-                img = cv2.copyMakeBorder(img, 0, 0, 0, 64 - width, cv2.BORDER_CONSTANT, value=(128, 128, 128))
+            if width < self._image_min_width:
+                img = cv2.copyMakeBorder(img, 0, 0, 0, self._image_min_width - width, cv2.BORDER_CONSTANT, value=(128, 128, 128))
                 print 'saving padded image!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
                 cv2.imwrite('padded_img.jpg', img)
-                width = 64
+                width = self._image_min_width
                 # no modify on width, because we want to keep information
 
             # -----Gen Annotation Data(meta_data)-----
@@ -259,8 +260,11 @@ class DeepFashionLandmark:
 
             # (d) joint_self (3*16) or (3*22) (float) (3 line)
             joints = np.asarray(im_lm_float_list).T.tolist()  # transpose to 3*16
+            print('%d %d %d'%(meta_data.shape[0],meta_data.shape[1],meta_data.shape[2]))
+            print('len(joints):%d'%len(joints))
             for i in range(len(joints)):
                 row_binary = self._float2bytes(joints[i])
+                print('len(row_binary):%d' % len(row_binary))
                 for j in range(len(row_binary)):
                     meta_data[clidx][j] = ord(row_binary[j])
                 clidx = clidx + 1
