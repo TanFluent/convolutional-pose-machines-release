@@ -16,9 +16,10 @@ layer {
     do_clahe: false
     num_parts:18
     np_in_lmdb:18
-    transform_body_joint:false
-    visualize:false
-    visualize_label:false
+    cloth_lm_dataset=deepfashion_landmark
+    transform_body_joint:true
+    visualize:true
+    visualize_label:true
   }
   cpmdata_param {
     source: "/tanfulun/workspaces/Project/clothing_key_point_detection/convolutional-pose-machines-release/dataset/DeepfashionLandmark/lmdb/train"
