@@ -17,10 +17,16 @@ class DeepFashionLandmark:
         self.cloth_type = ['None', 'upper-body', 'lower-body', 'full-body']
         self.pose_type = ['None', 'normal pose', 'medium pose', 'large pose', 'medium zoom-in', 'large zoom-in']
         self.visibility_type = ['visible', 'invisible', 'truncated']
-        self.upper_body_lm = ["left collar", "right collar", "left sleeve", "right sleeve", "left hem", "right hem"]
-        self.lower_body_lm = ["left waistline", "right waistline", "left hem", "right hem"]
-        self.full_body_lm = ["left collar", "right collar", "left sleeve", "right sleeve", "left waistline",
-                             "right waistline", "left hem", "right hem"]
+
+        # TODO: TMD!!!!! Real orders is opposite with the description of "README.txt"
+        # self.upper_body_lm = ["left collar", "right collar", "left sleeve", "right sleeve", "left hem", "right hem"]
+        # self.lower_body_lm = ["left waistline", "right waistline", "left hem", "right hem"]
+        # self.full_body_lm = ["left collar", "right collar", "left sleeve", "right sleeve", "left waistline",
+        #                     "right waistline", "left hem", "right hem"]
+        self.upper_body_lm = ["right collar", "left collar", "right sleeve", "left sleeve", "right hem", "left hem"]
+        self.lower_body_lm = ["right waistline", "left waistline", "right hem", "left hem"]
+        self.full_body_lm = ["right collar", "left collar", "right sleeve", "left sleeve", "right waistline",
+                             "left waistline", "right hem", "left hem"]
 
     def show_DeepFashionLM(self):
 
@@ -143,6 +149,8 @@ class DeepFashionLandmark:
                 print("landmark #%d is not in image" % (idx/3))
 
             cv2.circle(im, (lm_x, lm_y), 10, color=lm_color)
+            cv2.putText(im, '%d'%(idx/3), (lm_x, lm_y), fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=0.5, color=lm_color,
+                    thickness=2)
 
         # plot joints
         joints = joints_info['joints']

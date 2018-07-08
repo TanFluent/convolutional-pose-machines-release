@@ -17,7 +17,7 @@ class DeepFashionLandmark:
         self._visibility_type = ['visible', 'invisible', 'truncated']
         self._dataset_name = 'DeepFashion_Landmark'
         self._num_of_max_landmark = 18
-        self._image_min_width = 18 * 4
+        self._image_min_width = 18 * 4  # each "float(kp coords)" need at least 4 byte
 
         # --Dataset Dir
         self._dataset_dir = dataset_dir
@@ -258,8 +258,8 @@ class DeepFashionLandmark:
                 meta_data[clidx][i] = ord(scale_provided_binary[i])
             clidx = clidx + 1
 
-            # (d) joint_self (3*16) or (3*22) (float) (3 line)
-            joints = np.asarray(im_lm_float_list).T.tolist()  # transpose to 3*16
+            # (d) joint_self from "Nx3" -> "3xN";  row0:x,row1:y,row2:visible
+            joints = np.asarray(im_lm_float_list).T.tolist()  # transpose to 3*N
             print('%d %d %d'%(meta_data.shape[0],meta_data.shape[1],meta_data.shape[2]))
             print('len(joints):%d'%len(joints))
             for i in range(len(joints)):
