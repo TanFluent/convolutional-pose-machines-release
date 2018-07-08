@@ -113,6 +113,7 @@ RUN pip --no-cache-dir install --upgrade ipython && \
         configobj \
         lmdb \
         numpy \
+        plotly \
 		&& \
 	python -m ipykernel.kernelspec
 
